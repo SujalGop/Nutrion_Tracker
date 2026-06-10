@@ -25,15 +25,21 @@ export default function Profile() {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        // Load existing profile if exists
-        const docSnap = await getDoc(doc(db, `users/${currentUser.uid}`));
-        if (docSnap.exists()) {
-           setFormData({ ...formData, ...docSnap.data() });
+        try {
+          // Load existing profile if exists
+          const docSnap = await getDoc(doc(db, `users/${currentUser.uid}`));
+          if (docSnap.exists()) {
+             setFormData({ ...formData, ...docSnap.data() });
+          }
+        } catch (err) {
+          console.error("Failed to load profile (likely Firestore rules):", err);
+        } finally {
+          setLoading(false);
         }
       } else {
         router.push('/');
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
   }, [router]);

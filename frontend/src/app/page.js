@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [profile, setProfile] = useState(null);
   const [dailyLog, setDailyLog] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -65,12 +66,14 @@ export default function Dashboard() {
         setDailyLog(aggregated);
     } catch (err) {
         console.error("Dashboard error", err);
+        setErrorMsg(err.message);
     } finally {
         setLoading(false);
     }
   };
 
   if (loading) return <div style={{textAlign: 'center', padding: '4rem'}}>Loading Dashboard...</div>;
+  if (errorMsg) return <div style={{textAlign: 'center', padding: '4rem', color: '#ff6b6b'}}><h3>Database Error</h3><p>{errorMsg}</p><p style={{marginTop: '1rem', color: 'var(--text-secondary)'}}>Ensure your Firestore Security Rules allow read/write access.</p></div>;
   
   if (!user) {
       return (
