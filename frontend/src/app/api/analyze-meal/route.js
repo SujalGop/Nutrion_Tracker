@@ -3,34 +3,34 @@ import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import { getAuth } from 'firebase-admin/auth';
 import { customInitApp } from '@/lib/firebase-admin';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({
-  model: 'gemini-3.1-flash-lite',
-  generationConfig: {
-    responseMimeType: "application/json",
-    responseSchema: {
-      type: SchemaType.ARRAY,
-      description: "List of base ingredients and their estimated weights in grams.",
-      items: {
-        type: SchemaType.OBJECT,
-        properties: {
-          ingredient: {
-            type: SchemaType.STRING,
-            description: "The name of the base ingredient (e.g., 'paneer', 'ghee', 'basmati rice'). Use common names.",
-          },
-          weight_g: {
-            type: SchemaType.NUMBER,
-            description: "Estimated weight of the ingredient in grams.",
-          },
-        },
-        required: ["ingredient", "weight_g"],
-      },
-    },
-  }
-});
-
 export async function POST(request) {
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-3.1-flash-lite',
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: SchemaType.ARRAY,
+          description: "List of base ingredients and their estimated weights in grams.",
+          items: {
+            type: SchemaType.OBJECT,
+            properties: {
+              ingredient: {
+                type: SchemaType.STRING,
+                description: "The name of the base ingredient (e.g., 'paneer', 'ghee', 'basmati rice'). Use common names.",
+              },
+              weight_g: {
+                type: SchemaType.NUMBER,
+                description: "Estimated weight of the ingredient in grams.",
+              },
+            },
+            required: ["ingredient", "weight_g"],
+          },
+        },
+      }
+    });
+
     customInitApp();
     const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
