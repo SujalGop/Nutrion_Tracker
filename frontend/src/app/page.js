@@ -32,7 +32,8 @@ export default function Home() {
       const formData = new FormData();
       formData.append('image', file);
       
-      const response = await fetch('http://localhost:8000/meals/predict-meal', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/meals/predict-meal`, {
         method: 'POST',
         body: formData,
       });
@@ -65,7 +66,8 @@ export default function Home() {
             dish_name: prediction.dish_name,
             ingredients: prediction.ingredients
         };
-        const response = await fetch('http://localhost:8000/meals/verify-and-log-meal', {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${API_URL}/meals/verify-and-log-meal`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

@@ -18,7 +18,8 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchLog() {
       try {
-        const res = await fetch('http://localhost:8000/users/demo-user-123/daily-log');
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${API_URL}/users/demo-user-123/daily-log`);
         const data = await res.json();
         setDailyLog(data);
       } catch (err) {
