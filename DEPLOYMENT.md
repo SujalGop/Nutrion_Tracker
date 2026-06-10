@@ -1,35 +1,60 @@
-# Production Deployment Guide
+# Vercel Production Deployment Guide
 
-## 1. Backend Deployment (Render / Railway / AWS)
-Your FastAPI backend is now containerized via the included `Dockerfile`.
+Our architecture is fully serverless and designed specifically for Next.js on Vercel. There is no separate backend to deploy; everything (Frontend + API Routes) is handled by Vercel in a single deployment.
 
-**Steps to deploy on Render (Recommended for easiest Docker hosting):**
-1. Push your code to a GitHub repository.
-2. Create an account on [Render](https://render.com).
-3. Create a new **Web Service** and connect your GitHub repo.
-4. Set the Root Directory to `backend/`.
-5. Render will automatically detect the `Dockerfile` and build it.
-6. **Important:** In the Render dashboard, go to the "Environment" tab and add your variables:
-   * `DATABASE_URL` (Wait until Step 2 to get this)
-   * `GEMINI_API_KEY`
-   * `FATSECRET_CLIENT_ID`
-   * `FATSECRET_CLIENT_SECRET`
+## Prerequisites
+Make sure you have all your environment variables ready. You will need to add these to the Vercel Dashboard:
+- `GEMINI_API_KEY`
+- `FATSECRET_CLIENT_ID`
+- `FATSECRET_CLIENT_SECRET`
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY`
 
-## 2. Database Deployment (Neon.tech)
-1. Sign up at [Neon](https://neon.tech) and create a new project.
-2. Copy the connection string (it will look like `postgresql://user:password@endpoint.neon.tech/dbname?sslmode=require`).
-3. Replace the `postgresql://` prefix with `postgresql+asyncpg://` to match our async SQLAlchemy setup.
-4. Paste this full URL into your Render `DATABASE_URL` environment variable.
+## Option 1: Deploy via Vercel CLI (Fastest)
 
-## 3. Frontend Deployment (Vercel)
-Vercel provides zero-configuration deployments for Next.js.
-1. Sign up at [Vercel](https://vercel.com) and connect your GitHub repository.
-2. Select the repository and set the **Root Directory** to `frontend/`.
-3. Vercel will automatically detect the Next.js framework.
-4. Go to **Environment Variables** and add:
-   * `NEXT_PUBLIC_API_URL` = `https://your-render-app-url.onrender.com` 
-*(Note: You will need to update `c:\Nutrion tracker\frontend\src\app\page.js` to point `fetch()` to `process.env.NEXT_PUBLIC_API_URL` instead of localhost for production)*
-5. Click **Deploy**.
+If you want to deploy directly from your local terminal:
 
-## Post-Deployment
-Once both services are green, your Indian Cuisine AI Nutrition Tracker is officially live on the internet!
+1. Open your terminal and navigate to the `frontend` folder:
+   ```bash
+   cd frontend
+   ```
+2. Run the Vercel CLI command:
+   ```bash
+   npx vercel
+   ```
+3. Follow the interactive prompts:
+   - **Set up and deploy?** `Y`
+   - **Which scope?** (Select your Vercel account)
+   - **Link to existing project?** `N`
+   - **What's your project's name?** `nutrition-tracker`
+   - **In which directory is your code located?** `./`
+   - **Want to modify these settings?** `N`
+4. Once deployed, run the following command to securely upload your `.env.local` variables to Vercel:
+   ```bash
+   npx vercel env pull .env.local
+   npx vercel env push
+   ```
+   *(Alternatively, copy-paste them manually in the Vercel Dashboard -> Project -> Settings -> Environment Variables)*
+5. Finally, deploy to Production:
+   ```bash
+   npx vercel --prod
+   ```
+
+## Option 2: Deploy via GitHub (Recommended for CI/CD)
+
+1. Commit your code and push it to a GitHub repository.
+2. Go to [Vercel](https://vercel.com/new).
+3. Import your GitHub repository.
+4. Set the **Root Directory** to `frontend`.
+5. Expand the **Environment Variables** section and paste in all the keys from your `.env.local` file.
+6. Click **Deploy**.
+
+## Post-Deployment Checklist
+- [ ] Go to your Firebase Console -> Authentication -> Settings -> Authorized domains.
+- [ ] Add your new `.vercel.app` domain to the list so Google Sign-In works in production!
