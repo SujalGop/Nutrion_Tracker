@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { auth, storage, db } from '@/lib/firebase';
 import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc } from 'firebase/firestore';
 import styles from './page.module.css';
 
@@ -58,7 +58,7 @@ export default function Home() {
     try {
       // 1. Upload to Firebase Storage
       const storageRef = ref(storage, `meals/${user.uid}/${Date.now()}_${file.name}`);
-      const uploadTask = await uploadBytesResumable(storageRef, file);
+      const uploadTask = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(uploadTask.ref);
       
       // 2. Call our API Route
@@ -73,14 +73,19 @@ export default function Home() {
       });
       
       if (!response.ok) {
-        throw new Error(`API returned ${response.status}`);
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `Server returned ${response.status}`);
       }
       
       const data = await response.json();
       setPrediction(data);
     } catch (err) {
       console.error("Error analyzing image:", err);
-      setError("Failed to analyze image. Please try again.");
+      if (err.message.includes('unauthorized') || err.message.includes('permission')) {
+          setError("Storage Error: Your Firebase Storage rules are blocking the upload. Please update them in the console.");
+      } else {
+          setError(`Analysis Failed: ${err.message}`);
+      }
     } finally {
       setIsAnalyzing(false);
     }
