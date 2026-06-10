@@ -1,3 +1,4 @@
+export const maxDuration = 60; // Maximize Vercel Hobby timeout
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import { getAuth } from 'firebase-admin/auth';

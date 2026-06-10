@@ -1,3 +1,4 @@
+export const maxDuration = 60; // Maximize Vercel Hobby timeout
 import { NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
