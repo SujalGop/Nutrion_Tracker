@@ -39,24 +39,19 @@ export async function POST(request) {
     const idToken = authHeader.split('Bearer ')[1];
     const decodedToken = await getAuth().verifyIdToken(idToken);
     
-    const { imageUrl } = await request.json();
-    if (!imageUrl) {
-      return NextResponse.json({ error: 'Missing imageUrl' }, { status: 400 });
+    const { imageBase64 } = await request.json();
+    if (!imageBase64) {
+      return NextResponse.json({ error: 'Missing imageBase64 data' }, { status: 400 });
     }
 
-    const imageResp = await fetch(imageUrl);
-    if (!imageResp.ok) {
-        throw new Error("Failed to fetch image from URL");
-    }
-    const arrayBuffer = await imageResp.arrayBuffer();
-    const base64Image = Buffer.from(arrayBuffer).toString('base64');
-    const mimeType = imageResp.headers.get('content-type') || 'image/jpeg';
+    const mimeType = imageBase64.split(';')[0].split(':')[1];
+    const base64Data = imageBase64.split(',')[1];
 
     const prompt = `Analyze this image of a meal (likely Indian cuisine). Deconstruct it into its raw base ingredients and estimate the weight of each ingredient in grams. Focus on ingredients that contribute significantly to macros (e.g., paneer, oil/ghee, rice, chicken, lentils). Do not include water or trace spices. Return ONLY the JSON array.`;
 
     const imagePart = {
         inlineData: {
-            data: base64Image,
+            data: base64Data,
             mimeType: mimeType
         }
     };

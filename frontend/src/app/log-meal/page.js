@@ -1,8 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { auth, storage, db } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc } from 'firebase/firestore';
 import styles from './page.module.css';
 
@@ -56,10 +55,13 @@ export default function Home() {
     setFinalMacros(null);
     
     try {
-      // 1. Upload to Firebase Storage
-      const storageRef = ref(storage, `meals/${user.uid}/${Date.now()}_${file.name}`);
-      const uploadTask = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(uploadTask.ref);
+      // 1. Convert Image to Base64 in Browser
+      const base64String = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = error => reject(error);
+      });
       
       // 2. Call our API Route
       const idToken = await user.getIdToken();
@@ -69,7 +71,7 @@ export default function Home() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${idToken}`
         },
-        body: JSON.stringify({ imageUrl: downloadURL })
+        body: JSON.stringify({ imageBase64: base64String })
       });
       
       if (!response.ok) {
@@ -81,11 +83,7 @@ export default function Home() {
       setPrediction(data);
     } catch (err) {
       console.error("Error analyzing image:", err);
-      if (err.message.includes('unauthorized') || err.message.includes('permission')) {
-          setError("Storage Error: Your Firebase Storage rules are blocking the upload. Please update them in the console.");
-      } else {
-          setError(`Analysis Failed: ${err.message}`);
-      }
+      setError(`Analysis Failed: ${err.message}`);
     } finally {
       setIsAnalyzing(false);
     }
