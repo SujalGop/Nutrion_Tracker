@@ -95,7 +95,7 @@ export default function Profile() {
       };
 
       await setDoc(doc(db, `users/${user.uid}`), payload, { merge: true });
-      router.push('/dashboard');
+      router.push('/');
     } catch (err) {
       console.error("Error saving profile", err);
       alert("Failed to save profile.");
