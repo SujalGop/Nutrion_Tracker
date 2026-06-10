@@ -1,11 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@clerk/nextjs';
 import styles from './dashboard.module.css';
 import Link from 'next/link';
 
 export default function Dashboard() {
   const [dailyLog, setDailyLog] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  const { getToken, userId } = useAuth();
 
   // Hardcoded targets for demo purposes (would normally come from User profile)
   const targets = {
@@ -17,9 +20,18 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchLog() {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
       try {
+        const token = await getToken();
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const res = await fetch(`${API_URL}/users/demo-user-123/daily-log`);
+        const res = await fetch(`${API_URL}/users/${userId}/daily-log`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const data = await res.json();
         setDailyLog(data);
       } catch (err) {

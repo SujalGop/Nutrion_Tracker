@@ -8,7 +8,7 @@ from database import Base
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String(50), primary_key=True)
     age = Column(Integer)
     gender = Column(String(10))
     height_cm = Column(Float)
@@ -28,7 +28,7 @@ class DailyLog(Base):
     __tablename__ = "daily_logs"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    user_id = Column(String(50), ForeignKey("users.id"))
     log_date = Column(Date)
     total_calories = Column(Integer, default=0)
     total_protein = Column(Float, default=0)

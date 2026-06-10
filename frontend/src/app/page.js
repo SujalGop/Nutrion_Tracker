@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -9,6 +10,8 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [prediction, setPrediction] = useState(null);
   const [error, setError] = useState(null);
+  
+  const { getToken, userId } = useAuth();
   
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -60,16 +63,25 @@ export default function Home() {
 
   const verifyAndLog = async () => {
     if (!prediction) return;
+    if (!userId) {
+       alert("Please sign in to log meals.");
+       return;
+    }
+
     try {
+        const token = await getToken();
         const payload = {
-            user_id: "demo-user-123", // Hardcoded for demo
+            user_id: userId,
             dish_name: prediction.dish_name,
             ingredients: prediction.ingredients
         };
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         const response = await fetch(`${API_URL}/meals/verify-and-log-meal`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(payload)
         });
         if(response.ok) {

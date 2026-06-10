@@ -12,6 +12,7 @@ from core.config import settings
 import models
 import schemas
 import json
+from auth import get_current_user
 
 router = APIRouter(prefix="/meals", tags=["meals"])
 
@@ -107,11 +108,13 @@ class LogMealRequest(BaseModel):
     ingredients: List[IngredientParsed]
 
 @router.post("/verify-and-log-meal")
-async def verify_and_log_meal(request: LogMealRequest, db: AsyncSession = Depends(get_db)):
+async def verify_and_log_meal(request: LogMealRequest, db: AsyncSession = Depends(get_db), current_user: str = Depends(get_current_user)):
     """
     Fetches exact macros from FatSecret and saves to DB.
     Also updates the DishIngredientCache.
     """
+    # Enforce security: override user_id from payload with actual token user
+    request.user_id = current_user
     # 1. Update Cache
     cache_query = await db.execute(select(models.DishIngredientCache).where(models.DishIngredientCache.dish_name == request.dish_name))
     cache_entry = cache_query.scalars().first()
