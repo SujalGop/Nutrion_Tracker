@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@opentelemetry/api": "^1.9.1",
     "firebase": "^12.14.0",
     "firebase-admin": "^14.0.0",
     "next": "16.2.9",
