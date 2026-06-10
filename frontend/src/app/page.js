@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -18,11 +18,21 @@ export default function Dashboard() {
         setUser(currentUser);
         await fetchData(currentUser.uid);
       } else {
-        router.push('/');
+        setUser(null);
+        setLoading(false);
       }
     });
     return () => unsubscribe();
   }, [router]);
+
+  const handleSignIn = async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+          await signInWithPopup(auth, provider);
+      } catch (err) {
+          console.error("Sign in error", err);
+      }
+  };
 
   const fetchData = async (uid) => {
     try {
@@ -61,6 +71,17 @@ export default function Dashboard() {
   };
 
   if (loading) return <div style={{textAlign: 'center', padding: '4rem'}}>Loading Dashboard...</div>;
+  
+  if (!user) {
+      return (
+          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh'}}>
+              <h1 className="heading-gradient" style={{fontSize: '3rem', marginBottom: '1rem'}}>NutriTracker AI</h1>
+              <p style={{color: 'var(--text-secondary)', marginBottom: '2rem'}}>Sign in to track your Indian meals using Vision AI.</p>
+              <button className="btn-primary" onClick={handleSignIn}>Sign in with Google</button>
+          </div>
+      );
+  }
+
   if (!profile) return null;
 
   return (
