@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI, Type } from '@google/generative-ai';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import { getAuth } from 'firebase-admin/auth';
 import { customInitApp } from '@/lib/firebase-admin';
 
@@ -9,17 +9,17 @@ const model = genAI.getGenerativeModel({
   generationConfig: {
     responseMimeType: "application/json",
     responseSchema: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       description: "List of base ingredients and their estimated weights in grams.",
       items: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
           ingredient: {
-            type: Type.STRING,
+            type: SchemaType.STRING,
             description: "The name of the base ingredient (e.g., 'paneer', 'ghee', 'basmati rice'). Use common names.",
           },
           weight_g: {
-            type: Type.NUMBER,
+            type: SchemaType.NUMBER,
             description: "Estimated weight of the ingredient in grams.",
           },
         },

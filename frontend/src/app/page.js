@@ -107,7 +107,7 @@ function ProgressBar({ current, max, color }) {
     const pct = Math.min((current / max) * 100, 100) || 0;
     return (
         <div style={{width: '100%', height: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', overflow: 'hidden'}}>
-            <div style={{width: \`\${pct}%\`, height: '100%', background: color, transition: 'width 1s ease', borderRadius: '6px'}}></div>
+            <div style={{width: `${pct}%`, height: '100%', background: color, transition: 'width 1s ease', borderRadius: '6px'}}></div>
         </div>
     );
 }
